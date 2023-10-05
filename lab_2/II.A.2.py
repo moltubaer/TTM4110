@@ -1,28 +1,6 @@
 # ----- Lab II ----- #
-import simpy
-import numpy as np
-
-env = simpy.Environment()
-
-# ----- II.A.1 ----- #
-SIM_TIME = 60*24 # 24 hours in minutes
-lambda_rate = 0.5
-
-def user3_generator(env, lambda_rate):
-    inter_arrival_time = np.random.exponential(scale=1/lambda_rate)
-    i = 0
-    while True:
-        yield env.timeout(inter_arrival_time)
-        i += 1
-        # print(f"Generated User3 Request {i} at time {env.now}")
-    
-env.process(user3_generator(env, lambda_rate))
-env.run(until=SIM_TIME)
-
-
-
-
 # ----- II.A.2 ----- #
+
 def calculate_mos_score(bandwidth):
     thresholds = [0, 0.2, 0.5, 0.7, 1]
     mos_values = [1, 2, 3, 4, 5]
@@ -41,6 +19,7 @@ def calculate_mos_score(bandwidth):
 bandwidth = 0.9
 mos = calculate_mos_score(bandwidth)
 print(f"MOS Score: {mos}")
+
 
 
 
