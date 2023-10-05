@@ -12,7 +12,7 @@ used_blocks = 0
 Qmin = 0.6
 
 # Statistics variables
-i = 0
+user_id = 0
 rejects = 0
 successes = 0
 
@@ -36,12 +36,12 @@ def allocate_resources():
 
 def user3_generator(env, lambda_rate, Qmin):
     streaming_duration = np.random.exponential(scale=1/lambda_rate)
-    global i
+    global user_id
     while True:
         yield env.timeout(streaming_duration)
-        env.process(user3(env, i, Qmin, get_bandwidth()))
-        i += 1
-        # print(f"Generated User3 Request {i} at time {env.now}")
+        env.process(user3(env, user_id, Qmin, get_bandwidth()))
+        user_id += 1
+        # print(f"Generated User3 Request {user_id} at time {env.now}")
 
 def user3(env, id, Qmin, bandwidth):
     global rejects, successes, k
@@ -76,7 +76,10 @@ def user3(env, id, Qmin, bandwidth):
 env.process(user3_generator(env, lambda_rate, Qmin))
 env.run(until=SIM_TIME)
 
+checksum = user_id - rejects - successes
+
 print()
-print(f"Generated User3 processes: \t {i}")
+print(f"Generated User3 processes: \t {user_id}")
 print(f"Rejected users: \t\t {rejects}")
 print(f"Succesfull streams: \t\t {successes}")
+print(f"Checksum: \t\t\t {checksum}")
