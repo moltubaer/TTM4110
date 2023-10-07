@@ -198,8 +198,8 @@ mean_bandwidth = total_bandwidth/successes
 
 
 print()
-print(f"Price total: \t\t\t {p_total:.4f} NOK")
-print(f"Energy total: \t\t\t {e_total:.4f} kW")
+print(f"Price total: \t\t\t {p_total:.2f} NOK")
+print(f"Energy total: \t\t\t {e_total:.0f} kW")
 print(f"Mean bandwidth: \t\t {mean_bandwidth:.4f}")
 print(f"Mean MOS: \t\t\t {calculate_mos(mean_bandwidth)}")
 print()
