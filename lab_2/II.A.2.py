@@ -7,11 +7,14 @@ def calculate_mos_score(bandwidth):
 
     mos_score = None
     for i in range(len(thresholds)):
-        if bandwidth <= thresholds[i]:
+        if bandwidth < thresholds[i]:
             if i == 0:
                 mos_score = mos_values[0]
             else:
                 mos_score = mos_values[i-1]
+            break
+        elif bandwidth >= thresholds[-1]:
+            mos_score = mos_values[-1]
             break
 
     return mos_score
