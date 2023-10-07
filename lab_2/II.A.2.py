@@ -2,7 +2,7 @@
 # ----- II.A.2 ----- #
 
 def calculate_mos_score(bandwidth):
-    thresholds = [0, 0.2, 0.5, 0.7, 1]
+    thresholds = [0.0, 0.5, 0.6, 0.8, 0.9, 1.0]
     mos_values = [1, 2, 3, 4, 5]
 
     mos_score = None
@@ -16,9 +16,11 @@ def calculate_mos_score(bandwidth):
 
     return mos_score
 
-bandwidth = 0.9
+bandwidth = 0.7
 mos = calculate_mos_score(bandwidth)
-print(f"MOS Score: {mos}")
+print(f"Bandwidth: \t {bandwidth}")
+print(f"MOS Score: \t {mos}")
+
 
 
 
