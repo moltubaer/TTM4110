@@ -148,44 +148,42 @@ def el_price_simulation(env, pm_h):
     while True:
         start = env.now
 
-        if current_level == 'low':
-            bandwidth_modifier = 1.0
-        elif current_level == 'medium':
-            bandwidth_modifier = 0.9
-        elif current_level == 'high':
-            bandwidth_modifier = 0.8
+        match current_level:
+            case 'low':
+                bandwidth_modifier = 1.0
+                time_in_current_level = np.random.exponential(1.0 / lambda_low)
+            case 'medium':
+                bandwidth_modifier = 0.9
+                time_in_current_level = np.random.exponential(1.0 / lambda_medium)
+            case 'high':
+                bandwidth_modifier = 0.8
+                time_in_current_level = np.random.exponential(1.0 / lambda_high)
 
-        if current_level == 'low':
-            time_in_current_level = np.random.exponential(1.0 / lambda_low)
-        elif current_level == 'medium':
-            time_in_current_level = np.random.exponential(1.0 / lambda_medium)
-        elif current_level == 'high':
-            time_in_current_level = np.random.exponential(1.0 / lambda_high)
         
         yield env.timeout(time_in_current_level)
         
-        if current_level == 'low':
-            next_level = np.random.choice(['medium'])
-        elif current_level == 'medium':
-            next_level = np.random.choice(['low', 'high'], p=[1.0 - pm_h, pm_h])
-        elif current_level == 'high':
-            next_level = np.random.choice(['medium'])
+        match current_level:
+            case 'low' | 'high':
+                next_level = np.random.choice(['medium'])
+            case 'medium':
+                next_level = np.random.choice(['low', 'high'], p=[1.0 - pm_h, pm_h])    
 
         end = env.now
 
-        if current_level == 'low':
-            price = p_low * (end-start)
-            # print(f"{p_low:.4f} \t  {(end-start):.4f} \t {price:.4f}")
-        elif current_level == 'medium':
-            price = p_medium * (end-start)
-            # print(f"{p_medium:.4f} \t {(end-start):.4f} \t {price:.4f}")
-        elif current_level == 'high':
-            price = p_high * (end-start)
-            # print(f"{p_high:.4f} \t {(end-start):.4f} \t {price:.4f}")
+        match current_level:
+            case 'low':
+                price = p_low * (end-start)
+                print(f"{p_low:.4f} \t  {(end-start):.4f} \t {price:.4f}")
+            case 'medium':
+                price = p_medium * (end-start)
+                print(f"{p_medium:.4f} \t {(end-start):.4f} \t {price:.4f}")
+            case 'high':
+                price = p_high * (end-start)
+                print(f"{p_high:.4f} \t {(end-start):.4f} \t {price:.4f}")
 
         p_total += price*n
         current_level = next_level
-        # print(f"Time: {env.now:.2f}, Price Level: {current_level}")
+        print(f"Time: {env.now:.2f}, Price Level: {current_level}")
 
 
 
