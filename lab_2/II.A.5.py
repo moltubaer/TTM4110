@@ -197,9 +197,26 @@ def el_price_simulation(env, pm_h):
         current_level = next_level
         # print(f"Time: {env.now:.2f}, Price Level: {current_level}")
 
+def quality_simulation(env):
+    global mos
+    mos_scores = []
+    times = []
+    while True:
+        start = env.now
+        mos_scores.append(mos)
+
+        current_time = float(env.now)
+        times.append(round(current_time, 2))
+
+        print(f"Mos: {mos}, Time: {round(current_time, 2)}")
+
+
+
+
     
 env.process(el_price_simulation(env, pm_h))
 env.process(user3_generator(env, lambda_rate, Qmin))
+env.process(quality_simulation(env))
 env.run(until=SIM_TIME)
 
 checksum = user_id - rejects - successes - k
