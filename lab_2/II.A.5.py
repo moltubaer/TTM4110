@@ -30,6 +30,7 @@ lambda_medium = 1.0 / 60
 lambda_high = 1.0 / 60*2
 bandwidth_modifier = None
 total_bandwidth = 0
+total_mos = 0
 
 # Power statistic variable
 e_server = 1000
@@ -118,7 +119,7 @@ def user3_generator(env, lambda_rate, Qmin):
         # print(f"Generated User3 Request {user_id} at time {env.now}")
 
 def user3(env, id, Qmin, bandwidth):
-    global rejects, successes, k, n, m, used_blocks, bandwidth_modifier, e_total, e_active_user, total_bandwidth
+    global rejects, successes, k, n, m, used_blocks, bandwidth_modifier, e_total, e_active_user, total_bandwidth, total_mos
 
     # ----- Check quality ----- #
     if bandwidth < Qmin:
@@ -136,6 +137,8 @@ def user3(env, id, Qmin, bandwidth):
         energy = used_blocks*e_active_user
         e_total += energy
         total_bandwidth += bandwidth * bandwidth_modifier
+        mos = calculate_mos(bandwidth * bandwidth_modifier)     # MOS for a specific user
+        total_mos += mos
         successes += 1
         k -= 1
         used_blocks -= 1
@@ -177,13 +180,13 @@ def el_price_simulation(env, pm_h):
         match current_level:
             case 'low':
                 price = p_low * (end-start)
-                print(f"{p_low:.4f} \t  {(end-start):.4f} \t {price:.4f}")
+                # print(f"{p_low:.4f} \t  {(end-start):.4f} \t {price:.4f}")
             case 'medium':
                 price = p_medium * (end-start)
-                print(f"{p_medium:.4f} \t {(end-start):.4f} \t {price:.4f}")
+                # print(f"{p_medium:.4f} \t {(end-start):.4f} \t {price:.4f}")
             case 'high':
                 price = p_high * (end-start)
-                print(f"{p_high:.4f} \t {(end-start):.4f} \t {price:.4f}")
+                # print(f"{p_high:.4f} \t {(end-start):.4f} \t {price:.4f}")
 
         currentTime: float = float(env.now)
         times.append(round(currentTime, 2))
@@ -191,7 +194,7 @@ def el_price_simulation(env, pm_h):
 
         p_total += price*n
         current_level = next_level
-        print(f"Time: {env.now:.2f}, Price Level: {current_level}")
+        # print(f"Time: {env.now:.2f}, Price Level: {current_level}")
 
     
 env.process(el_price_simulation(env, pm_h))
@@ -199,7 +202,8 @@ env.process(user3_generator(env, lambda_rate, Qmin))
 env.run(until=SIM_TIME)
 
 checksum = user_id - rejects - successes - k
-mean_bandwidth = total_bandwidth/successes
+mean_bandwidth = total_bandwidth/(successes + k)
+mean_mos = total_mos/(successes + k)
 
 data = {"time": times, "price": prices}
 df = pd.DataFrame(data)
@@ -208,11 +212,10 @@ df.to_csv('output.csv', index=False)
 print()
 print(f"Price total: \t\t\t {p_total:.2f} NOK")
 print(f"Energy total: \t\t\t {e_total:.0f} kW")
-print(f"Mean bandwidth: \t\t {mean_bandwidth:.4f}")
-print(f"Mean MOS: \t\t\t {calculate_mos(mean_bandwidth)}")
+print(f"Mean bandwidth: \t\t {mean_bandwidth:.2f}")
+print(f"Mean MOS: \t\t\t {mean_mos:.2f} : {calculate_mos(mean_bandwidth)}")
 print()
 print(f"Generated User3 processes: \t {user_id}")
 print(f"Rejected users: \t\t {rejects}", f"{(rejects/user_id)*100:.4f}%")
 print(f"Succesfull streams: \t\t {successes + k}", f"{((successes+k)/user_id)*100:.4f}%")
-print(f"Checksum: \t\t\t {checksum}")
 print()
