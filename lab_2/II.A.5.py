@@ -31,6 +31,7 @@ lambda_high = 1.0 / 60*2
 bandwidth_modifier = None
 total_bandwidth = 0
 total_mos = 0
+mos = None
 
 # Power statistic variable
 e_server = 1000
@@ -119,7 +120,7 @@ def user3_generator(env, lambda_rate, Qmin):
         # print(f"Generated User3 Request {user_id} at time {env.now}")
 
 def user3(env, id, Qmin, bandwidth):
-    global rejects, successes, k, n, m, used_blocks, bandwidth_modifier, e_total, e_active_user, total_bandwidth, total_mos
+    global rejects, successes, k, n, m, used_blocks, bandwidth_modifier, e_total, e_active_user, total_bandwidth, mos, total_mos
 
     # ----- Check quality ----- #
     if bandwidth < Qmin:
