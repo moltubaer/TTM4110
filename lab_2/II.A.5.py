@@ -216,7 +216,7 @@ def quality_simulation(env):
     
 env.process(el_price_simulation(env, pm_h))
 env.process(user3_generator(env, lambda_rate, Qmin))
-env.process(quality_simulation(env))
+env.process(quality_simulation(env)) # ?? need to look into this shit
 env.run(until=SIM_TIME)
 
 checksum = user_id - rejects - successes - k
