@@ -3,6 +3,7 @@
 
 import simpy    
 import numpy as np
+import pandas as pd
 
 env = simpy.Environment()
 
@@ -39,6 +40,9 @@ p_medium = 1/60    # per kWH
 p_high = 5/60      # per kWH
 e_total = 0
 p_total = 0
+
+times = []
+prices = []
 
 
 def get_bandwidth():
@@ -181,12 +185,15 @@ def el_price_simulation(env, pm_h):
                 price = p_high * (end-start)
                 print(f"{p_high:.4f} \t {(end-start):.4f} \t {price:.4f}")
 
+        currentTime: float = float(env.now)
+        times.append(round(currentTime, 2))
+        prices.append(round(price, 2))
+
         p_total += price*n
         current_level = next_level
         print(f"Time: {env.now:.2f}, Price Level: {current_level}")
 
-
-
+    
 env.process(el_price_simulation(env, pm_h))
 env.process(user3_generator(env, lambda_rate, Qmin))
 env.run(until=SIM_TIME)
@@ -194,6 +201,9 @@ env.run(until=SIM_TIME)
 checksum = user_id - rejects - successes - k
 mean_bandwidth = total_bandwidth/successes
 
+data = {"time": times, "price": prices}
+df = pd.DataFrame(data)
+df.to_csv('output.csv', index=False)
 
 print()
 print(f"Price total: \t\t\t {p_total:.2f} NOK")
