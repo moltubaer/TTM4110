@@ -124,7 +124,7 @@ def user3(env, id, Qmin, bandwidth):
     global rejects, successes, k, n, m, used_blocks, bandwidth_modifier, e_total, e_active_user, total_bandwidth, mos, total_mos, gsla_violations
 
     # ----- Check quality ----- #
-    if bandwidth < Qmin:
+    if bandwidth * bandwidth_modifier < Qmin:
         rejects += 1
         # print(f"User {id} was rejected")
         gsla_violations += 1
@@ -227,5 +227,5 @@ print(f"Mean MOS: \t\t\t {mean_mos:.2f} : {calculate_mos(mean_bandwidth)}")
 print()
 print(f"Generated User3 processes: \t {user_id}")
 print(f"Rejected users: \t\t {rejects}", f"{(rejects/user_id)*100:.4f}%")
-print(f"Succesfull streams: \t\t {successes + k}", f"{((successes+k)/user_id)*100:.4f}%")
+print(f"Successfull streams: \t\t {successes + k}", f"{((successes+k)/user_id)*100:.4f}%")
 print()
