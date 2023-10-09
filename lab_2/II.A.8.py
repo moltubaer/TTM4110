@@ -22,7 +22,7 @@ def price_time_simulation(file):
     price2 = time_price_spline(time2)
 
     plt.figure(figsize=(10,6))
-    plt.plot(time2, price2, marker='o', linestyle='-')
+    plt.plot(time2, price2, linestyle='-')
     plt.title('task II.A.8')
     plt.xlabel('Time')
     plt.ylabel('Price')
@@ -53,7 +53,7 @@ def quality_time_simulation(file):
 
 if __name__ == "__main__":
 
-    # price_time_simulation('price_time.csv')
+    price_time_simulation('price-time.csv')
 
-    quality_time_simulation('quality-time.csv')
+    # quality_time_simulation('quality-time.csv')
 
