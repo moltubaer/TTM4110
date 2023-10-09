@@ -97,7 +97,7 @@ def calculate_resources():
         allocate_resources()
         return True
     elif (k+1) > n*m:
-        if n < 10:
+        if n < 20:
             scale_up()
             allocate_resources()
             return True
@@ -137,7 +137,7 @@ def user3(env, id, Qmin, bandwidth):
     if calculate_resources():
         # ----- Streaming ----- #
         stream_start = env.now
-        yield env.timeout(np.random.exponential(1))
+        yield env.timeout(np.random.exponential(60))
         time_active = env.now - stream_start
         # print(f"\t\t\t\t\t\t User {id} leaved after streaming for {time_active} minutes \t")
         energy = used_blocks*e_active_user
@@ -150,6 +150,8 @@ def user3(env, id, Qmin, bandwidth):
         current_time = round(float(env.now), 0)
         mos_time.append(current_time) # to much lines of data
         ####
+        
+        # print(f"n: {n} \t k: {k} \t used_active: {used_blocks}")
 
         total_mos += mos
         successes += 1
@@ -230,9 +232,9 @@ quality_time_data = {"time": mos_time, "quality": mos_s}
 df = pd.DataFrame(quality_time_data)
 df.to_csv('quality-time.csv', index=False)
 
-print(f"{gsla_violations}")
-print(f"{user_id + k}")
-print(f"{gsla_violations/(user_id + k)}")
+# print(f"{gsla_violations}")
+# print(f"{user_id + k}")
+# print(f"{gsla_violations/(user_id + k)}")
 
 
 print()
