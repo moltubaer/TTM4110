@@ -147,7 +147,7 @@ def user3(env, id, Qmin, bandwidth):
 
         # For qulity-time simulation
         mos_s.append(mos)
-        current_time = round(float(env.now), 2)
+        current_time = round(float(env.now), 0)
         mos_time.append(current_time) # to much lines of data
         ####
 

@@ -32,14 +32,20 @@ def price_time_simulation(file):
 
 
 def quality_time_simulation(file):
-    df =pd.read_csv(file)
+    df = pd.read_csv(file)
 
-    time = df['time']
-    quality = df['quality']
+    df_median = df.groupby('time')['quality'].median().reset_index()
+    # print(quality_collumn)
+    df_median.to_csv('result.csv', index=False)
 
-    plt.figure(figsize=(10,6))
-    # plt.plot(time, quality, marker='o', linestyle='-')
-    plt.plot(time, quality)
+    df_2 = pd.read_csv('result.csv')
+
+    time = df_2['time']
+    quality = df_2['quality']
+
+
+    plt.figure(figsize=(16,6))
+    plt.plot(time, quality, linestyle='-')
     plt.title('task II.A.8')
     plt.xlabel('Time')
     plt.ylabel('Quality')
@@ -53,7 +59,7 @@ def quality_time_simulation(file):
 
 if __name__ == "__main__":
 
-    price_time_simulation('price-time.csv')
+    # price_time_simulation('price-time.csv')
 
-    # quality_time_simulation('quality-time.csv')
+    quality_time_simulation('quality-time.csv')
 
