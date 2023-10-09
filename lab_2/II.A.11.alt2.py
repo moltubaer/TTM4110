@@ -151,7 +151,7 @@ def user3(env, id, Qmin, bandwidth, streaming_type):
 
         # ----- Streaming ----- #
         stream_start = env.now
-        yield env.timeout(np.random.exponential(1))
+        yield env.timeout(np.random.exponential(60))
         time_active = env.now - stream_start
         # print(f"\t\t\t\t\t\t User {id} leaved after streaming for {time_active} minutes \t")
         energy = used_blocks*e_active_user
