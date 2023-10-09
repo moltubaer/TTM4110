@@ -46,6 +46,9 @@ p_total = 0
 times = []
 prices = []
 
+mos_s = []
+mos_time = []
+
 
 def get_bandwidth():
     return np.random.random()
@@ -141,6 +144,13 @@ def user3(env, id, Qmin, bandwidth):
         e_total += energy
         total_bandwidth += bandwidth * bandwidth_modifier
         mos = calculate_mos(bandwidth * bandwidth_modifier)     # MOS for a specific user
+
+        # For qulity-time simulation
+        mos_s.append(mos)
+        current_time = round(float(env.now), 0)
+        mos_time.append(current_time) # to much lines of data
+        ####
+
         total_mos += mos
         successes += 1
         k -= 1
@@ -204,15 +214,21 @@ rng = np.random.default_rng(69420)
 env = simpy.Environment()
 env.process(el_price_simulation(env, pm_h))
 env.process(user3_generator(env, lambda_rate, Qmin))
+# env.process(quality_simulation(env)) # ?? need to look into this shit
 env.run(until=SIM_TIME)
 
 checksum = user_id - rejects - successes - k
 mean_bandwidth = total_bandwidth/(successes + k)
 mean_mos = total_mos/(successes + k)
 
-data = {"time": times, "price": prices}
-df = pd.DataFrame(data)
-df.to_csv('output.csv', index=False)
+price_time_data = {"time": times, "price": prices}
+df = pd.DataFrame(price_time_data)
+df.to_csv('price-time.csv', index=False)
+
+
+quality_time_data = {"time": mos_time, "quality": mos_s}
+df = pd.DataFrame(quality_time_data)
+df.to_csv('quality-time.csv', index=False)
 
 print(f"{gsla_violations}")
 print(f"{user_id + k}")

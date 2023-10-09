@@ -9,25 +9,57 @@ import numpy as np
 
 # simulation time = 24 hours
 
+def price_time_simulation(file):
+    df =pd.read_csv(file)
+
+    time = df['time']
+    price = df['price']
 
 
-df =pd.read_csv('output.csv')
+    time_price_spline = make_interp_spline(time, price)
 
-time = df['time']
-price = df['price']
+    time2 = np.linspace(time.min(), time.max(), 500)
+    price2 = time_price_spline(time2)
+
+    plt.figure(figsize=(10,6))
+    plt.plot(time2, price2, linestyle='-')
+    plt.title('task II.A.8')
+    plt.xlabel('Time')
+    plt.ylabel('Price')
+
+    plt.grid(False)
+    plt.show()
 
 
-time_price_spline = make_interp_spline(time, price)
+def quality_time_simulation(file):
+    df = pd.read_csv(file)
 
-time2 = np.linspace(time.min(), time.max(), 500)
-price2 = time_price_spline(time2)
+    df_median = df.groupby('time')['quality'].median().reset_index()
+    # print(quality_collumn)
+    df_median.to_csv('result.csv', index=False)
 
-plt.figure(figsize=(10,6))
-plt.plot(time2, price2, marker='o', linestyle='-')
-plt.title('task II.A.8')
-plt.xlabel('Time')
-plt.ylabel('Price')
+    df_2 = pd.read_csv('result.csv')
 
-plt.grid(False)
-plt.show()
+    time = df_2['time']
+    quality = df_2['quality']
+
+
+    plt.figure(figsize=(16,6))
+    plt.plot(time, quality, linestyle='-')
+    plt.title('task II.A.8')
+    plt.xlabel('Time')
+    plt.ylabel('Quality')
+
+    plt.grid(False)
+    plt.show()
+
+
+
+
+
+if __name__ == "__main__":
+
+    # price_time_simulation('price-time.csv')
+
+    quality_time_simulation('quality-time.csv')
 
