@@ -15,17 +15,11 @@ def price_time_simulation(file):
     time = df['time']
     price = df['price']
 
-
-    time_price_spline = make_interp_spline(time, price)
-
-    time2 = np.linspace(time.min(), time.max(), 500)
-    price2 = time_price_spline(time2)
-
     plt.figure(figsize=(10,6))
-    plt.plot(time2, price2, linestyle='-')
+    plt.plot(time, price, linestyle='-')
     plt.title('task II.A.8')
-    plt.xlabel('Time')
-    plt.ylabel('Price')
+    plt.xlabel('Time (minutes)')
+    plt.ylabel('Price (NOK)')
 
     plt.grid(False)
     plt.show()
@@ -47,8 +41,8 @@ def quality_time_simulation(file):
     plt.figure(figsize=(16,6))
     plt.plot(time, quality, linestyle='-')
     plt.title('task II.A.8')
-    plt.xlabel('Time')
-    plt.ylabel('Quality')
+    plt.xlabel('Time (minutes)')
+    plt.ylabel('Quality (MOS-score)')
 
     plt.grid(False)
     plt.show()
@@ -59,7 +53,7 @@ def quality_time_simulation(file):
 
 if __name__ == "__main__":
 
-    # price_time_simulation('price-time.csv')
+    price_time_simulation('price-time.csv')
 
     quality_time_simulation('quality-time.csv')
 
