@@ -5,7 +5,6 @@ import simpy
 import numpy as np
 import pandas as pd
 
-env = simpy.Environment()
 
 # Simulation variables
 n = 2   # min 2, max 10
@@ -18,6 +17,7 @@ Qmin = 0.5
 user_id = 0
 rejects = 0
 successes = 0
+gsla_violations = 0
 
 # Timing variables
 SIM_TIME = 60*24 # 24 hours in minutes
@@ -69,9 +69,8 @@ def calculate_mos(bandwidth):
     return mos_score
 
 def scale_up():
-    global n, m, k
-    if n < 10:
-        n += 1
+    global n
+    n += 1
     return
 
 def scale_down():
@@ -111,7 +110,9 @@ def calculate_resources():
             return True
 
 def user3_generator(env, lambda_rate, Qmin):
-    streaming_duration = np.random.exponential(1/lambda_rate)
+    global rng
+    # streaming_duration = np.random.exponential(1/lambda_rate)
+    streaming_duration = rng.exponential(1 / lambda_rate)
     global user_id
     while True:
         yield env.timeout(streaming_duration)
@@ -120,12 +121,13 @@ def user3_generator(env, lambda_rate, Qmin):
         # print(f"Generated User3 Request {user_id} at time {env.now}")
 
 def user3(env, id, Qmin, bandwidth):
-    global rejects, successes, k, n, m, used_blocks, bandwidth_modifier, e_total, e_active_user, total_bandwidth, mos, total_mos
+    global rejects, successes, k, n, m, used_blocks, bandwidth_modifier, e_total, e_active_user, total_bandwidth, mos, total_mos, gsla_violations
 
     # ----- Check quality ----- #
     if bandwidth < Qmin:
         rejects += 1
         # print(f"User {id} was rejected")
+        gsla_violations += 1
         return
 
     # ----- Check available resources ----- #
@@ -150,7 +152,7 @@ def user3(env, id, Qmin, bandwidth):
         return
 
 def el_price_simulation(env, pm_h):
-    global bandwidth_modifier, e_total, p_total, p_low, p_medium, p_high
+    global bandwidth_modifier, e_total, p_total, p_low, p_medium, p_high, rng
     current_level = 'medium'
 
     while True:
@@ -159,13 +161,13 @@ def el_price_simulation(env, pm_h):
         match current_level:
             case 'low':
                 bandwidth_modifier = 1.0
-                time_in_current_level = np.random.exponential(1.0 / lambda_low)
+                time_in_current_level = rng.exponential(1.0 / lambda_low)
             case 'medium':
                 bandwidth_modifier = 0.9
-                time_in_current_level = np.random.exponential(1.0 / lambda_medium)
+                time_in_current_level = rng.exponential(1.0 / lambda_medium)
             case 'high':
                 bandwidth_modifier = 0.8
-                time_in_current_level = np.random.exponential(1.0 / lambda_high)
+                time_in_current_level = rng.exponential(1.0 / lambda_high)
 
         
         yield env.timeout(time_in_current_level)
@@ -197,7 +199,9 @@ def el_price_simulation(env, pm_h):
         current_level = next_level
         # print(f"Time: {env.now:.2f}, Price Level: {current_level}")
 
-    
+# ----- Start simulation ----- #
+rng = np.random.default_rng(69420)
+env = simpy.Environment()
 env.process(el_price_simulation(env, pm_h))
 env.process(user3_generator(env, lambda_rate, Qmin))
 env.run(until=SIM_TIME)
@@ -209,6 +213,11 @@ mean_mos = total_mos/(successes + k)
 data = {"time": times, "price": prices}
 df = pd.DataFrame(data)
 df.to_csv('output.csv', index=False)
+
+print(f"{gsla_violations}")
+print(f"{user_id + k}")
+print(f"{gsla_violations/(user_id + k)}")
+
 
 print()
 print(f"Price total: \t\t\t {p_total:.2f} NOK")
