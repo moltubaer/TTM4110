@@ -18,8 +18,8 @@ def price_time_simulation(file):
     plt.figure(figsize=(10,6))
     plt.plot(time, price, linestyle='-')
     plt.title('task II.A.8')
-    plt.xlabel('Time')
-    plt.ylabel('Price')
+    plt.xlabel('Time (minutes)')
+    plt.ylabel('Price (NOK)')
 
     plt.grid(False)
     plt.show()
@@ -41,8 +41,8 @@ def quality_time_simulation(file):
     plt.figure(figsize=(16,6))
     plt.plot(time, quality, linestyle='-')
     plt.title('task II.A.8')
-    plt.xlabel('Time')
-    plt.ylabel('Quality (MOS)')
+    plt.xlabel('Time (minutes)')
+    plt.ylabel('Quality (MOS-score)')
 
     plt.grid(False)
     plt.show()
