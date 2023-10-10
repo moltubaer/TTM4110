@@ -125,10 +125,10 @@ def user3_generator(env, lambda_rate, Qmin):
 
 def user3(env, id, Qmin, bandwidth):
     global rejects, successes, k, used_blocks, e_total, total_bandwidth, total_mos, gsla_violations, gsla_boolean, gsla_time
-
+    bw = bandwidth*bandwidth_modifier
     # ----- Check quality ----- #
-    if (bandwidth*bandwidth_modifier) < Qmin:
-        # print(f"{bandwidth*bandwidth_modifier} \t {calculate_mos(bandwidth * bandwidth_modifier)} \t\t\t {bandwidth} \t {bandwidth_modifier}")
+    if bw < Qmin:
+        # print(f"{bw} \t {calculate_mos(bandwidth * bandwidth_modifier)} \t\t\t {bandwidth} \t {bandwidth_modifier}")
         rejects += 1
         # print(f"User {id} was rejected")
         gsla_violations += 1
@@ -136,6 +136,8 @@ def user3(env, id, Qmin, bandwidth):
             gsla_time = env.now
             gsla_boolean = True
         return
+    
+    # print(f"{bw} \t {calculate_mos(bw)} \t\t\t {bandwidth} \t {bandwidth_modifier}")
     
     # ----- Check available resources ----- #
     if calculate_resources():
@@ -146,10 +148,8 @@ def user3(env, id, Qmin, bandwidth):
         # print(f"\t\t\t\t\t\t User {id} leaved after streaming for {time_active} minutes \t")
         energy = used_blocks*e_active_user
         e_total += energy
-        total_bandwidth += bandwidth * bandwidth_modifier
-        mos = calculate_mos(bandwidth * bandwidth_modifier)     # MOS for a specific user
-
-        # print(f"{bandwidth*bandwidth_modifier} \t {mos} \t\t\t {bandwidth} \t {bandwidth_modifier}")
+        total_bandwidth += bw
+        mos = calculate_mos(bw)     # MOS for a specific user
 
         # For quality-time simulation
         mos_s.append(mos)
@@ -238,16 +238,15 @@ quality_time_data = {"time": mos_time, "quality": mos_s}
 df = pd.DataFrame(quality_time_data)
 df.to_csv('quality-time.csv', index=False)
 
-# print(f"{gsla_violations}")
-# print(f"{user_id + k}")
-# print(f"{gsla_violations/(user_id + k)}")
-# print(f"{gsla_time}, ")
-
 print()
 print(f"Price total: \t\t\t {p_total:.2f} NOK")
 print(f"Energy total: \t\t\t {e_total:.0f} kW")
 print(f"Mean bandwidth: \t\t {mean_bandwidth:.2f}")
 print(f"Mean MOS: \t\t\t {mean_mos:.2f} : {calculate_mos(mean_bandwidth)}")
+print()
+print(f"Total GSLA violations: \t\t {gsla_violations}")
+print(f"Probabilty for GSLA violation: \t {gsla_violations/(user_id + k)}")
+print(f"Time till GSLA violation: \t {gsla_time}")
 print()
 print(f"Generated User3 processes: \t {user_id}")
 print(f"Rejected users: \t\t {rejects}", f"{(rejects/user_id)*100:.4f}%")
