@@ -18,6 +18,8 @@ user_id = 0
 rejects = 0
 successes = 0
 gsla_violations = 0
+gsla_boolean = False
+gsla_time = 0
 
 # Timing variables
 SIM_TIME = 60*24 # 24 hours in minutes
@@ -31,7 +33,6 @@ lambda_high = 1.0 / 60*2
 bandwidth_modifier = None
 total_bandwidth = 0
 total_mos = 0
-mos = None
 
 # Power statistic variable
 e_server = 1000
@@ -97,7 +98,7 @@ def calculate_resources():
         allocate_resources()
         return True
     elif (k+1) > n*m:
-        if n < 20:
+        if n < 10:
             scale_up()
             allocate_resources()
             return True
@@ -114,7 +115,6 @@ def calculate_resources():
 
 def user3_generator(env, lambda_rate, Qmin):
     global rng
-    # streaming_duration = np.random.exponential(1/lambda_rate)
     streaming_duration = rng.exponential(1 / lambda_rate)
     global user_id
     while True:
@@ -124,15 +124,19 @@ def user3_generator(env, lambda_rate, Qmin):
         # print(f"Generated User3 Request {user_id} at time {env.now}")
 
 def user3(env, id, Qmin, bandwidth):
-    global rejects, successes, k, n, m, used_blocks, bandwidth_modifier, e_total, e_active_user, total_bandwidth, mos, total_mos, gsla_violations
+    global rejects, successes, k, used_blocks, e_total, total_bandwidth, total_mos, gsla_violations, gsla_boolean, gsla_time
 
     # ----- Check quality ----- #
-    if bandwidth * bandwidth_modifier < Qmin:
+    if (bandwidth*bandwidth_modifier) < Qmin:
+        # print(f"{bandwidth*bandwidth_modifier} \t {calculate_mos(bandwidth * bandwidth_modifier)} \t\t\t {bandwidth} \t {bandwidth_modifier}")
         rejects += 1
         # print(f"User {id} was rejected")
         gsla_violations += 1
+        if gsla_boolean == False:
+            gsla_time = env.now
+            gsla_boolean = True
         return
-
+    
     # ----- Check available resources ----- #
     if calculate_resources():
         # ----- Streaming ----- #
@@ -145,7 +149,9 @@ def user3(env, id, Qmin, bandwidth):
         total_bandwidth += bandwidth * bandwidth_modifier
         mos = calculate_mos(bandwidth * bandwidth_modifier)     # MOS for a specific user
 
-        # For qulity-time simulation
+        # print(f"{bandwidth*bandwidth_modifier} \t {mos} \t\t\t {bandwidth} \t {bandwidth_modifier}")
+
+        # For quality-time simulation
         mos_s.append(mos)
         current_time = round(float(env.now), 0)
         mos_time.append(current_time) # to much lines of data
@@ -235,7 +241,7 @@ df.to_csv('quality-time.csv', index=False)
 # print(f"{gsla_violations}")
 # print(f"{user_id + k}")
 # print(f"{gsla_violations/(user_id + k)}")
-
+# print(f"{gsla_time}, ")
 
 print()
 print(f"Price total: \t\t\t {p_total:.2f} NOK")
@@ -245,5 +251,5 @@ print(f"Mean MOS: \t\t\t {mean_mos:.2f} : {calculate_mos(mean_bandwidth)}")
 print()
 print(f"Generated User3 processes: \t {user_id}")
 print(f"Rejected users: \t\t {rejects}", f"{(rejects/user_id)*100:.4f}%")
-print(f"Successfull streams: \t\t {successes + k}", f"{((successes+k)/user_id)*100:.4f}%")
+print(f"Successful streams: \t\t {successes + k}", f"{((successes+k)/user_id)*100:.4f}%")
 print()
