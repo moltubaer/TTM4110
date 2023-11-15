@@ -95,16 +95,12 @@ downtime_system_parallel = []
 
 server_mdt = 0
 system_mdt = 0
-results = ''
 
 # Save results to txt file
 def save_results_to_txt(filename, txt):
     with open(filename, 'a') as txt_file:
         txt_file.write(f"{txt}\n")
 
-
-    with open(filename, 'w') as json_file:
-        json.dump(results, json_file)
 
 for i in range(1,4):
     filename_server = f'serial_{i}_server'
