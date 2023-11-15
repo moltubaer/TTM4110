@@ -100,7 +100,7 @@ results = ''
 # Save results to txt file
 def save_results_to_txt(filename, txt):
     with open(filename, 'a') as txt_file:
-        txt_file.write(f"{txt},\n")
+        txt_file.write(f"{txt}\n")
 
 
     with open(filename, 'w') as json_file:
