@@ -150,7 +150,7 @@ def user3(env, id, Qmin, bandwidth):
         e_total += energy
         total_bandwidth += bw
         mos = calculate_mos(bw)     # MOS for a specific user
-
+    
         # For quality-time simulation
         mos_s.append(mos)
         current_time = round(float(env.now), 0)
