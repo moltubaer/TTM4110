@@ -14,40 +14,42 @@ def server(env, repair_resources, n, lambda_srv, mu_srv, system_type, failures_c
     working_servers = n
     server_downtime_accumulator = 0
     system_downtime_accumulator = 0
-
-    # Time to next failure
-    time_to_failure = rng.exponential(lambda_srv)
-    yield env.timeout(time_to_failure)
     
-    # Server failure
-    working_servers -= 1
-    failure_time = env.now
-    
-    # Time to repair
-    repair_time = rng.exponential(mu_srv)
-    
-    # Request repair resources
-    with repair_resources.request() as req:
-        yield req
-        yield env.timeout(repair_time)
+    while failures_count[0] < 100:
+        # Time to next failure
+        time_to_failure = rng.exponential(lambda_srv)
+        yield env.timeout(time_to_failure)
         
-    if system_type == 'serial':
-        # server_downtime_accumulator += env.now - failure_time
-        if working_servers < n:
-            system_downtime_accumulator += env.now - failure_time
-    elif system_type == 'parallel':
-        # server_downtime_accumulator += env.now - failure_time
-        if working_servers == 0:
-            system_downtime_accumulator += env.now - failure_time
+        # Server failure
+        working_servers -= 1
+        failure_time = env.now
+        
+        # Time to repair (deterministic)
+        repair_time = rng.exponential(mu_srv)
+                
+        # Request repair resources
+        with repair_resources.request() as req:
+            yield req
+            yield env.timeout(repair_time)
+
+            
+        if system_type == 'serial':
+            if working_servers < n:
+                system_downtime_accumulator += env.now - failure_time
+        elif system_type == 'parallel':
+            if working_servers == 0:
+                system_downtime_accumulator += env.now - failure_time
+        else:
+            raise ValueError("Invalid system type")
+
+        # Server repair
+        working_servers += 1
+        server_downtime_accumulator += env.now - failure_time
+        failures_count[0] += 1
+    
     else:
-        raise ValueError("Invalid system type")
-
-    # Server repair
-    working_servers += 1
-    server_downtime_accumulator += env.now - failure_time
-
-    server_mdt = server_downtime_accumulator
-    system_mdt = system_downtime_accumulator
+        server_mdt = server_downtime_accumulator / failures_count[0]
+        system_mdt = system_downtime_accumulator / failures_count[0]
 
     return
 
@@ -100,6 +102,4 @@ def parallel():
             save_results_to_txt(filename_server, server_mdt)
             # save_results_to_txt(filename_system, system_mdt)
 
-serial()
 parallel()
-

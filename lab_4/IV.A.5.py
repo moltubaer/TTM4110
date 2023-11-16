@@ -10,50 +10,46 @@
 
 import simpy
 import numpy as np
-import json
 
 def server(env, repair_resources, n, lambda_srv, mu_srv, system_type, failures_count):
-    global server_mdt, system_mdt
+    global server_mdt, system_mdt, rng
     working_servers = n
     server_downtime_accumulator = 0
     system_downtime_accumulator = 0
-    
-    while failures_count[0] < 100:
-        # Time to next failure
-        time_to_failure = np.random.exponential(1/lambda_srv)
-        yield env.timeout(time_to_failure)
-        
-        # Server failure
-        working_servers -= 1
-        failure_time = env.now
-        
-        # Time to repair
-        repair_time = np.random.exponential(1/mu_srv)
-        
-        # Request repair resources
-        with repair_resources.request() as req:
-            yield req
-            yield env.timeout(repair_time)
-            
-        if system_type == 'serial':
-            # server_downtime_accumulator += env.now - failure_time
-            if working_servers < n:
-                system_downtime_accumulator += env.now - failure_time
-        elif system_type == 'parallel':
-            # server_downtime_accumulator += env.now - failure_time
-            if working_servers == 0:
-                system_downtime_accumulator += env.now - failure_time
-        else:
-            raise ValueError("Invalid system type")
 
-        # Server repair
-        working_servers += 1
-        server_downtime_accumulator += env.now - failure_time
-        failures_count[0] += 1
+    # Time to next failure
+    time_to_failure = np.random.exponential(lambda_srv)
+    yield env.timeout(time_to_failure)
     
+    # Server failure
+    working_servers -= 1
+    failure_time = env.now
+    
+    # Time to repair
+    repair_time = np.random.exponential(mu_srv)
+    
+    # Request repair resources
+    with repair_resources.request() as req:
+        yield req
+        yield env.timeout(repair_time)
+        
+    if system_type == 'serial':
+        # server_downtime_accumulator += env.now - failure_time
+        if working_servers < n:
+            system_downtime_accumulator += env.now - failure_time
+    elif system_type == 'parallel':
+        # server_downtime_accumulator += env.now - failure_time
+        if working_servers == 0:
+            system_downtime_accumulator += env.now - failure_time
     else:
-        server_mdt = server_downtime_accumulator/failures_count[0]
-        system_mdt = system_downtime_accumulator/failures_count[0]
+        raise ValueError("Invalid system type")
+
+    # Server repair
+    working_servers += 1
+    server_downtime_accumulator += env.now - failure_time
+
+    server_mdt = server_downtime_accumulator
+    system_mdt = system_downtime_accumulator
 
     return
 
@@ -87,7 +83,8 @@ def run_simulation(repairmen, system_type):
 
     return
 
-# Run simulations for serial and parallel systems with different numbers of repairmen
+# rng = np.random.default_rng(69420)
+
 downtime_server_serial = []
 downtime_system_serial = []
 downtime_server_parallel = []
@@ -109,7 +106,7 @@ for i in range(1,4):
         run_simulation(repairmen=i, system_type='serial')
 
         save_results_to_txt(filename_server, server_mdt)
-        save_results_to_txt(filename_system, system_mdt)
+        # save_results_to_txt(filename_system, system_mdt)
 
 for i in range(1,4):
     filename_server = f'parallel_{i}_server'
@@ -117,5 +114,5 @@ for i in range(1,4):
     for j in range(100):
         run_simulation(repairmen=i, system_type='parallel')
         save_results_to_txt(filename_server, server_mdt)
-        save_results_to_txt(filename_system, system_mdt)
+        # save_results_to_txt(filename_system, system_mdt)
 
